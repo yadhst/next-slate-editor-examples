@@ -1,4 +1,5 @@
 import MessageCard from "@/components/cards/message-card";
+import TextEditor from "@/components/forms/text-editor";
 
 const messages = [
     {
@@ -25,6 +26,14 @@ export default function Home() {
                 {messages.map((message, index) => (
                     <MessageCard key={`message-${index}`} {...message} />
                 ))}
+            </div>
+            <div className="flex flex-col gap-2">
+                <div>
+                    <span className="font-semibold">Your Username</span>
+                </div>
+                <div>
+                    <TextEditor />
+                </div>
             </div>
         </div>
     );
