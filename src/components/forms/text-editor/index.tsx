@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
 import { useMemo, useCallback } from "react";
-import { createEditor, type Descendant } from "slate"
+import { createEditor, type Descendant } from "slate";
 import {
     Slate,
     Editable,
@@ -12,6 +12,12 @@ import {
 } from "slate-react";
 import { withHistory } from "slate-history";
 
+import {
+    withMarkdownShortcuts,
+    withMarkdownShortcutsElement,
+    onDOMBeforeInput as markdownShortcutsHandleDom,
+} from "./with-markdown-shortcuts";
+
 const initialValue: Descendant[] = [
     {
         type: "paragraph",
@@ -20,19 +26,30 @@ const initialValue: Descendant[] = [
 ];
 
 export default function TextEditor() {
-    const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+    const editor = useMemo(
+        () => withHistory(withReact(withMarkdownShortcuts(createEditor()))),
+        []
+    );
 
     const renderLeaf = useCallback((props: RenderLeafProps) => {
         return <RenderLeafComponent {...props} />;
     }, []);
 
     const renderElement = useCallback((props: RenderElementProps) => {
-        return <RenderElementComponent {...props} />;
+        const ElementComponent = withMarkdownShortcutsElement(
+            RenderElementComponent
+        );
+
+        return <ElementComponent {...props} />;
     }, []);
 
     const renderPlaceholder = useCallback((props: RenderPlaceholderProps) => {
         return <RenderPlaceholderComponent {...props} />;
     }, []);
+
+    const onDOMBeforeInput = useCallback(() => {
+        markdownShortcutsHandleDom(editor);
+    }, [editor]);
 
     return (
         <Slate editor={editor} initialValue={initialValue}>
@@ -42,20 +59,24 @@ export default function TextEditor() {
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 renderPlaceholder={renderPlaceholder}
+                onDOMBeforeInput={onDOMBeforeInput}
             />
         </Slate>
-    )
+    );
 }
 
 function RenderElementComponent({ attributes, children }: RenderElementProps) {
-    return <div {...attributes}>{children}</div>
+    return <div {...attributes}>{children}</div>;
 }
 
 function RenderLeafComponent({ attributes, children }: RenderLeafProps) {
-    return <span {...attributes}>{children}</span>
+    return <span {...attributes}>{children}</span>;
 }
 
-function RenderPlaceholderComponent({ attributes, children }: RenderPlaceholderProps) {
+function RenderPlaceholderComponent({
+    attributes,
+    children,
+}: RenderPlaceholderProps) {
     return (
         <div className="relative">
             <div {...attributes}>{children}</div>
