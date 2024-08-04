@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { createEditor, type Descendant } from "slate";
+import { createEditor, type Descendant, type NodeEntry } from "slate";
 import {
     Slate,
     Editable,
@@ -17,6 +17,10 @@ import {
     withMarkdownShortcutsElement,
     onDOMBeforeInput as markdownShortcutsHandleDom,
 } from "./with-markdown-shortcuts";
+import {
+    withMarkdownPreviewLeaf,
+    decorateMarkdownPreview,
+} from "./with-markdown-preview";
 
 const initialValue: Descendant[] = [
     {
@@ -32,7 +36,8 @@ export default function TextEditor() {
     );
 
     const renderLeaf = useCallback((props: RenderLeafProps) => {
-        return <RenderLeafComponent {...props} />;
+        const LeafComponent = withMarkdownPreviewLeaf(RenderLeafComponent);
+        return <LeafComponent {...props} />;
     }, []);
 
     const renderElement = useCallback((props: RenderElementProps) => {
@@ -51,6 +56,11 @@ export default function TextEditor() {
         markdownShortcutsHandleDom(editor);
     }, [editor]);
 
+    const decorate = useCallback((entry: NodeEntry) => {
+        const markdownPreviewRanges = decorateMarkdownPreview(entry);
+        return [...markdownPreviewRanges];
+    }, []);
+
     return (
         <Slate editor={editor} initialValue={initialValue}>
             <Editable
@@ -60,6 +70,7 @@ export default function TextEditor() {
                 renderLeaf={renderLeaf}
                 renderPlaceholder={renderPlaceholder}
                 onDOMBeforeInput={onDOMBeforeInput}
+                decorate={decorate}
             />
         </Slate>
     );
