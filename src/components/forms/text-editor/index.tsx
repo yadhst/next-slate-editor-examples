@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback } from "react";
-import { createEditor, type Descendant, type NodeEntry } from "slate";
+import { createEditor, Node, type Descendant, type NodeEntry } from "slate";
 import {
     Slate,
     Editable,
@@ -16,6 +16,7 @@ import {
     withMarkdownShortcuts,
     withMarkdownShortcutsElement,
     onDOMBeforeInput as markdownShortcutsHandleDom,
+    stringifyMSElement,
 } from "./with-markdown-shortcuts";
 import {
     withMarkdownPreviewLeaf,
@@ -61,8 +62,18 @@ export default function TextEditor() {
         return [...markdownPreviewRanges];
     }, []);
 
+    function stringifyNodes(nodes: Descendant[]) {
+        return nodes
+            .map((node) => stringifyMSElement(node, Node.string(node)))
+            .join("\n");
+    }
+
     return (
-        <Slate editor={editor} initialValue={initialValue}>
+        <Slate
+            editor={editor}
+            initialValue={initialValue}
+            onValueChange={(nodes) => stringifyNodes(nodes)}
+        >
             <Editable
                 className="prose prose-invert h-[138px] max-w-full overflow-y-auto rounded-md border border-zinc-100/10 px-4 py-2 text-sm"
                 placeholder="What's on your mind?"

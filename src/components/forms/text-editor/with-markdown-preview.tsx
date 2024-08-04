@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { type RenderLeafProps } from "slate-react";
 import { Text, type NodeEntry, type BaseRange, type Path } from "slate";

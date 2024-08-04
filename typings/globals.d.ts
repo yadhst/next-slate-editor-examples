@@ -2,7 +2,7 @@
 import { BaseEditor, Descendant } from "slate";
 import { ReactEditor } from "slate-react";
 
-type CustomElement = { type: string; children: CustomText[] };
+type CustomElement = { type: string; children: CustomText[]; key?: string };
 type CustomText = {
     text: string;
     title?: string;

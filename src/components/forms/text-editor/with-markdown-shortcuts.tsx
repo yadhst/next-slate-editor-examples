@@ -7,6 +7,7 @@ import {
     Range,
     Transforms,
     Editor,
+    type Descendant,
 } from "slate";
 import { ReactEditor, type RenderElementProps } from "slate-react";
 
@@ -50,6 +51,7 @@ export function withMarkdownShortcuts(editor: Editor) {
 
                 const newNode: Partial<SlateElement> = {
                     type: shortcutsEntry.type,
+                    key: beforeText,
                 };
 
                 Transforms.setNodes<SlateElement>(editor, newNode, {
@@ -62,6 +64,7 @@ export function withMarkdownShortcuts(editor: Editor) {
                     const listNode = {
                         type: "bulleted-list",
                         children: [],
+                        key: beforeText,
                     };
 
                     Transforms.wrapNodes(editor, listNode, {
@@ -200,4 +203,15 @@ export function onDOMBeforeInput(editor: Editor) {
             ReactEditor.androidScheduleFlush(editor);
         }
     });
+}
+
+export function stringifyMSElement(node: Descendant, text: string) {
+    if (!SlateElement.isElement(node)) return text;
+
+    const shortcutsEntry = ShortcutsEntries.find((entry) => {
+        const type = node.type === "bulleted-list" ? "list" : node.type;
+        return entry.type === type && entry.keys.includes(node.key!);
+    });
+
+    return shortcutsEntry ? `${node.key} ${text}` : text;
 }
